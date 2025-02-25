@@ -155,8 +155,6 @@ func (c *RedisClient) doRequest(
 	urlAddress *url.URL,
 	res interface{},
 ) (http.Header, annotations.Annotations, error) {
-	l := ctxzap.Extract(ctx)
-
 	var (
 		resp *http.Response
 		err  error
@@ -172,8 +170,6 @@ func (c *RedisClient) doRequest(
 		uhttp.WithAcceptJSONHeader(),
 		uhttp.WithHeader("Authorization", "Basic "+authorizationToken),
 	)
-
-	l.Info(fmt.Sprintf("Request %v", req))
 
 	if err != nil {
 		return nil, nil, err
