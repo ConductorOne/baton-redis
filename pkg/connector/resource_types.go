@@ -10,3 +10,15 @@ var userResourceType = &v2.ResourceType{
 	DisplayName: "User",
 	Traits:      []v2.ResourceType_Trait{v2.ResourceType_TRAIT_USER},
 }
+
+var clusterResourceType = &v2.ResourceType{
+	Id:          "cluster",
+	DisplayName: "Cluster",
+	Traits:      []v2.ResourceType_Trait{v2.ResourceType_TRAIT_APP},
+}
+
+var roleResourceType = &v2.ResourceType{
+	Id:          "role",
+	DisplayName: "Role",
+	Traits:      []v2.ResourceType_Trait{v2.ResourceType_TRAIT_ROLE},
+}
