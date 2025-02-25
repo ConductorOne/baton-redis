@@ -1,0 +1,22 @@
+[
+  {
+    "management": "admin",
+    "name": "Admin",
+    "uid": 1
+  },
+  {
+    "management": "db_viewer",
+    "name": "Member",
+    "uid": 2
+  },
+  {
+    "management": "cluster_viewer",
+    "name": "Super Member",
+    "uid": 3
+  },
+  {
+    "management": "admin",
+    "name": "Full User",
+    "uid": 4
+  }
+]

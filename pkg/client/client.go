@@ -16,7 +16,6 @@ import (
 const (
 	getUsers    = "/v1/users"
 	getRoles    = "/v1/roles"
-	getCluster  = "/v1/cluster"
 	getRoleById = "/v1/roles/%v"
 )
 
@@ -61,7 +60,7 @@ func New(ctx context.Context, redisClient *RedisClient) (*RedisClient, error) {
 	return &client, nil
 }
 
-func NewClient(username, password, clusterHost string, apiPort string, httpClient ...*uhttp.BaseHttpClient) *RedisClient {
+func NewClient(username, password, clusterHost, apiPort string, httpClient ...*uhttp.BaseHttpClient) *RedisClient {
 	var wrapper = &uhttp.BaseHttpClient{}
 	if httpClient != nil || len(httpClient) != 0 {
 		wrapper = httpClient[0]
@@ -86,19 +85,6 @@ func (c *RedisClient) ListUsers(ctx context.Context) ([]User, annotations.Annota
 	}
 
 	return res, annotation, nil
-}
-
-func (c *RedisClient) ListClusters(ctx context.Context) ([]Cluster, annotations.Annotations, error) {
-	l := ctxzap.Extract(ctx)
-	var res Cluster
-
-	annotation, err := c.getResourcesFromAPI(ctx, getCluster, &res)
-	if err != nil {
-		l.Error(fmt.Sprintf("Error getting resources: %s", err))
-		return nil, nil, err
-	}
-
-	return []Cluster{res}, annotation, nil
 }
 
 func (c *RedisClient) ListRoles(ctx context.Context) ([]Role, annotations.Annotations, error) {

@@ -65,6 +65,7 @@ Available Commands:
   help               Help about any command
 
 Flags:
+      --api-port string              The Redis Enterprise admin port ($BATON_API_PORT) (default "9443")
       --client-id string             The client ID used to authenticate with ConductorOne ($BATON_CLIENT_ID)
       --client-secret string         The client secret used to authenticate with ConductorOne ($BATON_CLIENT_SECRET)
       --cluster-host                 required: The cluster host for your Redis Enterprise Serivice ($BATON_CLUSTER_HOST)

@@ -1,0 +1,32 @@
+[
+  {
+    "auth_method": "regular",
+    "certificate_subject_line": "",
+    "email": "testuser1@redislabs.com",
+    "email_alerts": true,
+    "name": "Test User 1",
+    "password_issue_date": "2025-02-25T13:46:12Z",
+    "role": "admin",
+    "role_uids": [
+      1
+    ],
+    "status": "active",
+    "uid": 1
+  },
+  {
+    "auth_method": "regular",
+    "certificate_subject_line": "",
+    "email": "testuser2@redislabs.com",
+    "email_alerts": true,
+    "name": "Test User 2",
+    "password_issue_date": "2025-02-25T13:46:12Z",
+    "role": "db_viewer",
+    "role_uids": [
+      2,
+      3,
+      4
+    ],
+    "status": "active",
+    "uid": 2
+  }
+]
