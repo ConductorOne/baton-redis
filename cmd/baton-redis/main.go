@@ -5,13 +5,14 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/conductorone/baton-redis/pkg/client"
+	connectorSchema "github.com/conductorone/baton-redis/pkg/connector"
 	"github.com/conductorone/baton-sdk/pkg/config"
 	"github.com/conductorone/baton-sdk/pkg/connectorbuilder"
 	"github.com/conductorone/baton-sdk/pkg/field"
 	"github.com/conductorone/baton-sdk/pkg/types"
 	"github.com/grpc-ecosystem/go-grpc-middleware/logging/zap/ctxzap"
 	"github.com/spf13/viper"
-	"github.com/conductorone/baton-redis/pkg/connector"
 	"go.uber.org/zap"
 )
 
@@ -44,16 +45,26 @@ func main() {
 
 func getConnector(ctx context.Context, v *viper.Viper) (types.ConnectorServer, error) {
 	l := ctxzap.Extract(ctx)
+
+	clusterHost := v.GetString(clusterHostField.FieldName)
+	username := v.GetString(usernameField.FieldName)
+	password := v.GetString(passwordField.FieldName)
+	apiPort := v.GetString(apiPortField.FieldName)
+
+	redisClient := client.NewClient(username, password, clusterHost, apiPort)
 	if err := ValidateConfig(v); err != nil {
 		return nil, err
 	}
 
-	cb, err := connector.New(ctx)
+	connectorBuilder, err := connectorSchema.New(ctx, redisClient)
 	if err != nil {
 		l.Error("error creating connector", zap.Error(err))
 		return nil, err
 	}
-	connector, err := connectorbuilder.NewConnector(ctx, cb)
+
+	opts := make([]connectorbuilder.Opt, 0)
+
+	connector, err := connectorbuilder.NewConnector(ctx, connectorBuilder, opts...)
 	if err != nil {
 		l.Error("error creating connector", zap.Error(err))
 		return nil, err

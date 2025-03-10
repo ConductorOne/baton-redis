@@ -38,6 +38,8 @@ baton resources
 
 `baton-redis` will pull down information about the following resources:
 - Users
+- Clusters
+- Roles
 
 # Contributing, Support and Issues
 
@@ -63,14 +65,18 @@ Available Commands:
   help               Help about any command
 
 Flags:
+      --api-port string              The Redis Enterprise admin port ($BATON_API_PORT) (default "9443")
       --client-id string             The client ID used to authenticate with ConductorOne ($BATON_CLIENT_ID)
       --client-secret string         The client secret used to authenticate with ConductorOne ($BATON_CLIENT_SECRET)
+      --cluster-host                 required: The cluster host for your Redis Enterprise Serivice ($BATON_CLUSTER_HOST)
   -f, --file string                  The path to the c1z file to sync with ($BATON_FILE) (default "sync.c1z")
   -h, --help                         help for baton-redis
       --log-format string            The output format for logs: json, console ($BATON_LOG_FORMAT) (default "json")
       --log-level string             The log level: debug, info, warn, error ($BATON_LOG_LEVEL) (default "info")
+      --password                     required: Redis Enterprise Sign In password ($BATON_PASSWORD)
   -p, --provisioning                 If this connector supports provisioning, this must be set in order for provisioning actions to be enabled ($BATON_PROVISIONING)
       --ticketing                    This must be set to enable ticketing support ($BATON_TICKETING)
+      --username                     required: Redis Enterprise Sign In Email/Username ($BATON_USERNAME)
   -v, --version                      version for baton-redis
 
 Use "baton-redis [command] --help" for more information about a command.
