@@ -24,6 +24,10 @@ jobs:
         run: go build -o connector ./cmd/baton-redis
 
       - name: Run and save output
+        env:
+          BATON_CLUSTER_HOST: "example"
+          BATON_USERNAME: "example"
+          BATON_PASSWORD: "example"
         run: ./connector capabilities > baton_capabilities.json
 
       - name: Commit changes
