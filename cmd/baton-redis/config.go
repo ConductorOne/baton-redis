@@ -1,41 +1,7 @@
 package main
 
 import (
-	"github.com/conductorone/baton-sdk/pkg/field"
 	"github.com/spf13/viper"
-)
-
-var (
-	clusterHostField = field.StringField(
-		"cluster-host",
-		field.WithDescription("The enterprise cluster host"),
-		field.WithRequired(true),
-	)
-	apiPortField = field.StringField(
-		"api-port",
-		field.WithDescription("The enterprise API port"),
-		field.WithDefaultValue("9443"),
-	)
-	usernameField = field.StringField(
-		"username",
-		field.WithDescription("The enterprise cluster admin username"),
-		field.WithRequired(true),
-	)
-	passwordField = field.StringField(
-		"password",
-		field.WithDescription("The enterprise cluster admin password"),
-		field.WithRequired(true),
-	)
-	// ConfigurationFields defines the external configuration required for the
-	// connector to run. Note: these fields can be marked as optional or
-	// required.
-	ConfigurationFields = []field.SchemaField{clusterHostField, apiPortField, usernameField, passwordField}
-
-	// FieldRelationships defines relationships between the fields listed in
-	// ConfigurationFields that can be automatically validated. For example, a
-	// username and password can be required together, or an access token can be
-	// marked as mutually exclusive from the username password pair.
-	FieldRelationships = []field.SchemaFieldRelationship{}
 )
 
 // ValidateConfig is run after the configuration is loaded, and should return an

@@ -6,11 +6,11 @@ import (
 	"os"
 
 	"github.com/conductorone/baton-redis/pkg/client"
+	cfg "github.com/conductorone/baton-redis/pkg/config"
 	connectorSchema "github.com/conductorone/baton-redis/pkg/connector"
 	"github.com/conductorone/baton-sdk/pkg/config"
 	"github.com/conductorone/baton-sdk/pkg/connectorbuilder"
 	"github.com/conductorone/baton-sdk/pkg/connectorrunner"
-	"github.com/conductorone/baton-sdk/pkg/field"
 	"github.com/conductorone/baton-sdk/pkg/types"
 	"github.com/grpc-ecosystem/go-grpc-middleware/logging/zap/ctxzap"
 	"github.com/spf13/viper"
@@ -26,9 +26,7 @@ func main() {
 		ctx,
 		"baton-redis",
 		getConnector,
-		field.Configuration{
-			Fields: ConfigurationFields,
-		},
+		cfg.Config,
 		connectorrunner.WithDefaultCapabilitiesConnectorBuilder(&connectorSchema.Connector{}),
 	)
 	if err != nil {
@@ -48,10 +46,10 @@ func main() {
 func getConnector(ctx context.Context, v *viper.Viper) (types.ConnectorServer, error) {
 	l := ctxzap.Extract(ctx)
 
-	clusterHost := v.GetString(clusterHostField.FieldName)
-	username := v.GetString(usernameField.FieldName)
-	password := v.GetString(passwordField.FieldName)
-	apiPort := v.GetString(apiPortField.FieldName)
+	clusterHost := v.GetString(cfg.ClusterHostField.FieldName)
+	username := v.GetString(cfg.UsernameField.FieldName)
+	password := v.GetString(cfg.PasswordField.FieldName)
+	apiPort := v.GetString(cfg.ApiPortField.FieldName)
 
 	redisClient := client.NewClient(username, password, clusterHost, apiPort)
 	if err := ValidateConfig(v); err != nil {
