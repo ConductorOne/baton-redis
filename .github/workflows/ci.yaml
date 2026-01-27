@@ -1,52 +1,46 @@
 name: ci
-on: pull_request
+on:
+  pull_request:
+    types: [opened, reopened, synchronize]
+  push:
+    branches:
+      - main
 jobs:
   go-lint:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
       - name: Install Go
         uses: actions/setup-go@v5
         with:
-          go-version: 1.22.x
-      - name: Checkout code
-        uses: actions/checkout@v4
+          go-version-file: 'go.mod'
       - name: Run linters
-        uses: golangci/golangci-lint-action@v5
+        uses: golangci/golangci-lint-action@v8
         with:
           version: latest
           args: --timeout=3m
   go-test:
     strategy:
       matrix:
-        go-version: [1.22.x]
         platform: [ubuntu-latest]
     runs-on: ${{ matrix.platform }}
     steps:
-      - name: Install Go
-        if: success()
-        uses: actions/setup-go@v5
-        with:
-          go-version: ${{ matrix.go-version }}
       - name: Checkout code
         uses: actions/checkout@v4
+      - name: Install Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: 'go.mod'
       - name: go tests
-        run: (set -o pipefail && go test -v -covermode=count -json ./... | tee test.json)
+        run: go test -v -covermode=count -json ./... > test.json
       - name: annotate go tests
         if: always()
-        uses: guyarb/golang-test-annotations@v0.5.1
+        uses: guyarb/golang-test-annotations@v0.6.0
         with:
           test-results: test.json
-
   test:
     runs-on: ubuntu-latest
-    # Define any services needed for the test suite (or delete this section)
-    # services:
-    #   postgres:
-    #     image: postgres:16
-    #     ports:
-    #       - "5432:5432"
-    #     env:
-    #       POSTGRES_PASSWORD: secretpassword
     env:
       BATON_LOG_LEVEL: debug
       BATON_BASE_HOST: 'http://localhost'
@@ -56,65 +50,53 @@ jobs:
       CONNECTOR_ENTITLEMENT: 'role:1:admin'
       CONNECTOR_PRINCIPAL: '1'
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
       - name: Install Go
         uses: actions/setup-go@v5
         with:
-          go-version: 1.22.x
-      - name: Checkout code
-        uses: actions/checkout@v4
-
+          go-version-file: 'go.mod'
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
-
-      # Step 1: Init Redis Enterprise container using HTTP
       - name: Run Redis Enterprise container
         run: |
             docker run -d --cap-add sys_resource --name redis-enterprise \
             -p 8080:8080 \
             -e REDIS_ENTERPRISE_API_USE_HTTP=true \
             redislabs/redis:latest
-
       - name: Wait for Redis Enterprise container to initialize
         run: |
           sleep 30
-
       - name: Check if Redis Enterprise is running
         run: |
           docker ps -a
-
       - name: Create Redis cluster using rladmin
         run: |
             docker exec -d --privileged redis-enterprise "/opt/redislabs/bin/rladmin" cluster create name cluster-ci.local username ${{ env.BATON_USER }} password ${{ env.BATON_PASSWORD }}
-
       - name: Wait until Redis Enterprise API is ready
         run: |
-          echo "⏳ Waiting for Redis Enterprise to become healthy..."
+          echo "Waiting for Redis Enterprise to become healthy..."
           max_retries=10
           for i in $(seq 1 $max_retries); do
             response=$(curl -s -u "${{ env.BATON_USER }}:${{ env.BATON_PASSWORD }}" "${{ env.BATON_BASE_HOST }}:${{ env.BATON_API_PORT }}/v1/nodes" || true)
             echo "Response: $response"
             if echo "$response" | grep -q '"status":"active"'; then
-                echo "✅ Redis Enterprise is ready!"
+                echo "Redis Enterprise is ready!"
                 break
             fi
-            echo "⏳ Waiting for Redis Enterprise to become healthy..."
+            echo "Waiting for Redis Enterprise to become healthy..."
             sleep 30
             if [ $i -eq $max_retries ]; then
-              echo "❌ Error: Redis Enterprise is not ready after $max_retries attempts."
+              echo "Error: Redis Enterprise is not ready after $max_retries attempts."
               exit 1
             fi
           done
-
       - name: Build baton-redis
         run: go build ./cmd/baton-redis
-
       - name: Run baton-redis
         run: ./baton-redis --cluster-host ${{ env.BATON_BASE_HOST }} --api-port ${{ env.BATON_API_PORT }} --username ${{ env.BATON_USER }} --password ${{ env.BATON_PASSWORD }}
-
       - name: Install baton
         run: ./scripts/get-baton.sh && mv baton /usr/local/bin
-
       - name: Check for grants
-
         run:
           baton grants --entitlement="${{ env.CONNECTOR_ENTITLEMENT }}" --output-format=json | jq --exit-status ".grants[].principal.id.resource == \"${{ env.CONNECTOR_PRINCIPAL }}\""
