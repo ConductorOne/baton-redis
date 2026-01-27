@@ -53,7 +53,7 @@ func NewTestClient(response *http.Response, err error) *client.RedisClient {
 func ReadFile(fileName string) string {
 	data, err := os.ReadFile("../../test/mockResponses/" + fileName)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal(err) //nolint:gocritic // test helper function, panic is acceptable
 	}
 
 	return string(data)
