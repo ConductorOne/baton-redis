@@ -1,6 +1,6 @@
 ![Baton Logo](./baton-logo.png)
 
-# `baton-redis` [![Go Reference](https://pkg.go.dev/badge/github.com/conductorone/baton-redis.svg)](https://pkg.go.dev/github.com/conductorone/baton-redis) ![main ci](https://github.com/conductorone/baton-redis/actions/workflows/main.yaml/badge.svg)
+# `baton-redis` [![Go Reference](https://pkg.go.dev/badge/github.com/conductorone/baton-redis.svg)](https://pkg.go.dev/github.com/conductorone/baton-redis) ![ci](https://github.com/conductorone/baton-redis/actions/workflows/ci.yaml/badge.svg) ![verify](https://github.com/conductorone/baton-redis/actions/workflows/verify.yaml/badge.svg)
 
 `baton-redis` is a connector for built using the [Baton SDK](https://github.com/conductorone/baton-sdk).
 
