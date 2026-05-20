@@ -133,8 +133,8 @@ func newRoleBuilder(c *client.RedisClient) *roleBuilder {
 }
 
 func (o *roleBuilder) GetUsers(ctx context.Context) error {
-	o.usersMutex.RLock()
-	defer o.usersMutex.RUnlock()
+	o.usersMutex.Lock()
+	defer o.usersMutex.Unlock()
 
 	if o.users != nil || len(o.users) > 0 {
 		return nil
