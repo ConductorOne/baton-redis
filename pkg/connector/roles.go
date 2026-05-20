@@ -152,8 +152,8 @@ func (o *roleBuilder) GetUsers(ctx context.Context) error {
 }
 
 func (o *roleBuilder) GetRoles(ctx context.Context) error {
-	o.rolesMutex.RLock()
-	defer o.rolesMutex.RUnlock()
+	o.rolesMutex.Lock()
+	defer o.rolesMutex.Unlock()
 
 	if o.roles == nil {
 		o.roles = make(map[int]client.Role)
