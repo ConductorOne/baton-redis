@@ -26,6 +26,7 @@ var Config = field.NewConfiguration([]field.SchemaField{
 		"password",
 		field.WithDescription("The enterprise cluster admin password"),
 		field.WithRequired(true),
+		field.WithIsSecret(true),
 	),
 })
 
