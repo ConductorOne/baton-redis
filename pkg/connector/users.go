@@ -7,9 +7,7 @@ import (
 
 	"github.com/conductorone/baton-redis/pkg/client"
 	v2 "github.com/conductorone/baton-sdk/pb/c1/connector/v2"
-	"github.com/conductorone/baton-sdk/pkg/annotations"
-	"github.com/conductorone/baton-sdk/pkg/pagination"
-	"github.com/conductorone/baton-sdk/pkg/types/resource"
+	rs "github.com/conductorone/baton-sdk/pkg/types/resource"
 )
 
 type userBuilder struct {
@@ -23,25 +21,25 @@ func (o *userBuilder) ResourceType(_ context.Context) *v2.ResourceType {
 
 // List returns all the users from the database as resource objects.
 // Users include a UserTrait because they are the 'shape' of a standard user.
-func (o *userBuilder) List(ctx context.Context, _ *v2.ResourceId, _ *pagination.Token) ([]*v2.Resource, string, annotations.Annotations, error) {
+func (o *userBuilder) List(ctx context.Context, _ *v2.ResourceId, _ rs.SyncOpAttrs) ([]*v2.Resource, *rs.SyncOpResults, error) {
 	var resources []*v2.Resource
 
 	// Note: Redis Enterprise Service API doesn't support pagination.
-	users, annotation, err := o.client.ListUsers(ctx)
+	users, _, err := o.client.ListUsers(ctx)
 	if err != nil {
-		return nil, "", nil, err
+		return nil, nil, err
 	}
 
 	for _, user := range users {
 		userCopy := user
 		userResource, err := parseIntoUserResource(ctx, &userCopy, nil)
 		if err != nil {
-			return nil, "", nil, err
+			return nil, nil, err
 		}
 		resources = append(resources, userResource)
 	}
 
-	return resources, "", annotation, nil
+	return resources, nil, nil
 }
 
 func parseIntoUserResource(_ context.Context, user *client.User, parentResourceID *v2.ResourceId) (*v2.Resource, error) {
@@ -55,20 +53,20 @@ func parseIntoUserResource(_ context.Context, user *client.User, parentResourceI
 		"role_uids":       parseRoleUIDs(user.RoleUIDs),
 	}
 
-	userTraits := []resource.UserTraitOption{
-		resource.WithUserProfile(profile),
-		resource.WithStatus(userStatus),
-		resource.WithUserLogin(user.Name),
+	userTraits := []rs.UserTraitOption{
+		rs.WithUserProfile(profile),
+		rs.WithStatus(userStatus),
+		rs.WithUserLogin(user.Name),
 	}
 
 	displayName := user.Name
 
-	ret, err := resource.NewUserResource(
+	ret, err := rs.NewUserResource(
 		displayName,
 		userResourceType,
 		user.UID,
 		userTraits,
-		resource.WithParentResourceID(parentResourceID),
+		rs.WithParentResourceID(parentResourceID),
 	)
 	if err != nil {
 		return nil, err
@@ -78,13 +76,13 @@ func parseIntoUserResource(_ context.Context, user *client.User, parentResourceI
 }
 
 // Entitlements always returns an empty slice for users.
-func (o *userBuilder) Entitlements(_ context.Context, _ *v2.Resource, _ *pagination.Token) ([]*v2.Entitlement, string, annotations.Annotations, error) {
-	return nil, "", nil, nil
+func (o *userBuilder) Entitlements(_ context.Context, _ *v2.Resource, _ rs.SyncOpAttrs) ([]*v2.Entitlement, *rs.SyncOpResults, error) {
+	return nil, nil, nil
 }
 
 // Grants always returns an empty slice for users since they don't have any entitlements.
-func (o *userBuilder) Grants(ctx context.Context, _ *v2.Resource, _ *pagination.Token) ([]*v2.Grant, string, annotations.Annotations, error) {
-	return nil, "", nil, nil
+func (o *userBuilder) Grants(ctx context.Context, _ *v2.Resource, _ rs.SyncOpAttrs) ([]*v2.Grant, *rs.SyncOpResults, error) {
+	return nil, nil, nil
 }
 
 func newUserBuilder(c *client.RedisClient) *userBuilder {
