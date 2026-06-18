@@ -25,7 +25,7 @@ func (o *userBuilder) List(ctx context.Context, _ *v2.ResourceId, _ rs.SyncOpAtt
 	var resources []*v2.Resource
 
 	// Note: Redis Enterprise Service API doesn't support pagination.
-	users, _, err := o.client.ListUsers(ctx)
+	users, annos, err := o.client.ListUsers(ctx)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -39,7 +39,7 @@ func (o *userBuilder) List(ctx context.Context, _ *v2.ResourceId, _ rs.SyncOpAtt
 		resources = append(resources, userResource)
 	}
 
-	return resources, nil, nil
+	return resources, &rs.SyncOpResults{Annotations: annos}, nil
 }
 
 func parseIntoUserResource(_ context.Context, user *client.User, parentResourceID *v2.ResourceId) (*v2.Resource, error) {

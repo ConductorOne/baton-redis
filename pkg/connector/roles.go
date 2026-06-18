@@ -8,6 +8,7 @@ import (
 
 	"github.com/conductorone/baton-redis/pkg/client"
 	v2 "github.com/conductorone/baton-sdk/pb/c1/connector/v2"
+	"github.com/conductorone/baton-sdk/pkg/annotations"
 	"github.com/conductorone/baton-sdk/pkg/types/entitlement"
 	"github.com/conductorone/baton-sdk/pkg/types/grant"
 	rs "github.com/conductorone/baton-sdk/pkg/types/resource"
@@ -30,7 +31,7 @@ func (o *roleBuilder) List(ctx context.Context, _ *v2.ResourceId, _ rs.SyncOpAtt
 	var resources []*v2.Resource
 
 	// Note: Redis Enterprise Service API doesn't support pagination.
-	roles, _, err := o.client.ListRoles(ctx)
+	roles, annos, err := o.client.ListRoles(ctx)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -44,7 +45,7 @@ func (o *roleBuilder) List(ctx context.Context, _ *v2.ResourceId, _ rs.SyncOpAtt
 		resources = append(resources, roleResource)
 	}
 
-	return resources, nil, nil
+	return resources, &rs.SyncOpResults{Annotations: annos}, nil
 }
 
 func parseIntoRoleResource(_ context.Context, role *client.Role, parentResourceID *v2.ResourceId) (*v2.Resource, error) {
@@ -97,14 +98,15 @@ func (o *roleBuilder) Grants(ctx context.Context, resource *v2.Resource, _ rs.Sy
 	var grants []*v2.Grant
 
 	// Note: Redis Enterprise Service API doesn't support pagination.
-	err := o.GetUsers(ctx)
+	userAnnos, err := o.GetUsers(ctx)
 	if err != nil {
 		return nil, nil, err
 	}
-	err = o.GetRoles(ctx)
+	roleAnnos, err := o.GetRoles(ctx)
 	if err != nil {
 		return nil, nil, err
 	}
+	annos := append(userAnnos, roleAnnos...)
 
 	for _, user := range o.users {
 		for _, roleUID := range user.RoleUIDs {
@@ -120,7 +122,7 @@ func (o *roleBuilder) Grants(ctx context.Context, resource *v2.Resource, _ rs.Sy
 		}
 	}
 
-	return grants, nil, nil
+	return grants, &rs.SyncOpResults{Annotations: annos}, nil
 }
 
 func newRoleBuilder(c *client.RedisClient) *roleBuilder {
@@ -130,26 +132,25 @@ func newRoleBuilder(c *client.RedisClient) *roleBuilder {
 	}
 }
 
-func (o *roleBuilder) GetUsers(ctx context.Context) error {
+func (o *roleBuilder) GetUsers(ctx context.Context) (annotations.Annotations, error) {
 	o.usersMutex.Lock()
 	defer o.usersMutex.Unlock()
 
 	if o.users != nil || len(o.users) > 0 {
-		return nil
+		return nil, nil
 	}
 
-	users, _, err := o.client.ListUsers(ctx)
-
+	users, annos, err := o.client.ListUsers(ctx)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	o.users = users
 
-	return nil
+	return annos, nil
 }
 
-func (o *roleBuilder) GetRoles(ctx context.Context) error {
+func (o *roleBuilder) GetRoles(ctx context.Context) (annotations.Annotations, error) {
 	o.rolesMutex.Lock()
 	defer o.rolesMutex.Unlock()
 
@@ -158,18 +159,17 @@ func (o *roleBuilder) GetRoles(ctx context.Context) error {
 	}
 
 	if len(o.roles) > 0 {
-		return nil
+		return nil, nil
 	}
 
-	roles, _, err := o.client.ListRoles(ctx)
-
+	roles, annos, err := o.client.ListRoles(ctx)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	for _, role := range roles {
 		o.roles[role.UID] = role
 	}
 
-	return nil
+	return annos, nil
 }
