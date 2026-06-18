@@ -4,8 +4,8 @@ import (
 	"context"
 	"io"
 
-	cfg "github.com/conductorone/baton-redis/pkg/config"
 	"github.com/conductorone/baton-redis/pkg/client"
+	cfg "github.com/conductorone/baton-redis/pkg/config"
 	v2 "github.com/conductorone/baton-sdk/pb/c1/connector/v2"
 	"github.com/conductorone/baton-sdk/pkg/annotations"
 	"github.com/conductorone/baton-sdk/pkg/cli"
