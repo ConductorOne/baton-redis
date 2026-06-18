@@ -77,7 +77,7 @@ func parseIntoRoleResource(_ context.Context, role *client.Role, parentResourceI
 
 func (o *roleBuilder) Entitlements(ctx context.Context, resource *v2.Resource, _ rs.SyncOpAttrs) ([]*v2.Entitlement, *rs.SyncOpResults, error) {
 	var entitlements []*v2.Entitlement
-	role, _, err := o.client.GetRoleDetails(ctx, resource.Id.Resource)
+	role, annos, err := o.client.GetRoleDetails(ctx, resource.Id.Resource)
 
 	if err != nil {
 		return nil, nil, err
@@ -91,7 +91,7 @@ func (o *roleBuilder) Entitlements(ctx context.Context, resource *v2.Resource, _
 
 	entitlements = append(entitlements, entitlement.NewPermissionEntitlement(resource, role.Management, assigmentOptions...))
 
-	return entitlements, nil, nil
+	return entitlements, &rs.SyncOpResults{Annotations: annos}, nil
 }
 
 func (o *roleBuilder) Grants(ctx context.Context, resource *v2.Resource, _ rs.SyncOpAttrs) ([]*v2.Grant, *rs.SyncOpResults, error) {
@@ -106,7 +106,7 @@ func (o *roleBuilder) Grants(ctx context.Context, resource *v2.Resource, _ rs.Sy
 	if err != nil {
 		return nil, nil, err
 	}
-	annos := append(userAnnos, roleAnnos...)
+	userAnnos = append(userAnnos, roleAnnos...)
 
 	for _, user := range o.users {
 		for _, roleUID := range user.RoleUIDs {
@@ -122,7 +122,7 @@ func (o *roleBuilder) Grants(ctx context.Context, resource *v2.Resource, _ rs.Sy
 		}
 	}
 
-	return grants, &rs.SyncOpResults{Annotations: annos}, nil
+	return grants, &rs.SyncOpResults{Annotations: userAnnos}, nil
 }
 
 func newRoleBuilder(c *client.RedisClient) *roleBuilder {
