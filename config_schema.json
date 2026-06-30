@@ -94,7 +94,9 @@
     },
     {
       "name": "cluster-host",
+      "displayName": "Cluster Host",
       "description": "The enterprise cluster host",
+      "placeholder": "Your Redis Enterprise cluster host",
       "isRequired": true,
       "stringField": {
         "rules": {
@@ -104,14 +106,18 @@
     },
     {
       "name": "api-port",
+      "displayName": "API Port",
       "description": "The enterprise API port",
+      "placeholder": "9443",
       "stringField": {
         "defaultValue": "9443"
       }
     },
     {
       "name": "username",
+      "displayName": "Username",
       "description": "The enterprise cluster admin username",
+      "placeholder": "Your Redis Enterprise admin username",
       "isRequired": true,
       "stringField": {
         "rules": {
@@ -121,7 +127,9 @@
     },
     {
       "name": "password",
+      "displayName": "Password",
       "description": "The enterprise cluster admin password",
+      "placeholder": "Your Redis Enterprise admin password",
       "isRequired": true,
       "isSecret": true,
       "stringField": {
@@ -130,5 +138,8 @@
         }
       }
     }
-  ]
+  ],
+  "displayName": "Redis",
+  "helpUrl": "/docs/baton/redis",
+  "iconUrl": "/static/app-icons/redis.svg"
 }

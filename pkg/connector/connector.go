@@ -5,8 +5,10 @@ import (
 	"io"
 
 	"github.com/conductorone/baton-redis/pkg/client"
+	cfg "github.com/conductorone/baton-redis/pkg/config"
 	v2 "github.com/conductorone/baton-sdk/pb/c1/connector/v2"
 	"github.com/conductorone/baton-sdk/pkg/annotations"
+	"github.com/conductorone/baton-sdk/pkg/cli"
 	"github.com/conductorone/baton-sdk/pkg/connectorbuilder"
 	"github.com/grpc-ecosystem/go-grpc-middleware/logging/zap/ctxzap"
 	"go.uber.org/zap"
@@ -16,9 +18,9 @@ type Connector struct {
 	client *client.RedisClient
 }
 
-// ResourceSyncers returns a ResourceSyncer for each resource type that should be synced from the upstream service.
-func (d *Connector) ResourceSyncers(ctx context.Context) []connectorbuilder.ResourceSyncer {
-	return []connectorbuilder.ResourceSyncer{
+// ResourceSyncers returns a ResourceSyncerV2 for each resource type that should be synced from the upstream service.
+func (d *Connector) ResourceSyncers(ctx context.Context) []connectorbuilder.ResourceSyncerV2 {
+	return []connectorbuilder.ResourceSyncerV2{
 		newUserBuilder(d.client),
 		newRoleBuilder(d.client),
 	}
@@ -57,4 +59,14 @@ func New(ctx context.Context, redisClient *client.RedisClient) (*Connector, erro
 	return &Connector{
 		client: redisClient,
 	}, nil
+}
+
+// NewLambdaConnector satisfies cli.NewConnector for use with config.RunConnector.
+func NewLambdaConnector(ctx context.Context, ac *cfg.Redis, _ *cli.ConnectorOpts) (connectorbuilder.ConnectorBuilderV2, []connectorbuilder.Opt, error) {
+	redisClient := client.NewClient(ac.Username, ac.Password, ac.ClusterHost, ac.ApiPort)
+	cb, err := New(ctx, redisClient)
+	if err != nil {
+		return nil, nil, err
+	}
+	return cb, nil, nil
 }
