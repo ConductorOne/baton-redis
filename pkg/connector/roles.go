@@ -55,9 +55,7 @@ func parseIntoRoleResource(_ context.Context, role *client.Role, parentResourceI
 		"management_role": role.Management,
 	}
 
-	roleTraits := []rs.RoleTraitOption{
-		rs.WithRoleProfile(profile),
-	}
+	roleTraits := []rs.RoleTraitOption{}
 
 	displayName := role.Name
 
@@ -66,6 +64,7 @@ func parseIntoRoleResource(_ context.Context, role *client.Role, parentResourceI
 		roleResourceType,
 		role.UID,
 		roleTraits,
+		rs.WithResourceProfile(profile),
 		rs.WithParentResourceID(parentResourceID),
 	)
 	if err != nil {
